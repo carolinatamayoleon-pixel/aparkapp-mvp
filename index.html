@@ -228,18 +228,18 @@ function render() {
   const mc = document.getElementById('main-content');
 
   if(step==='welcome') {
-    mc.innerHTML = `<div class="ob-wrap">
-      <div style="background:linear-gradient(160deg,#11396D 0%,#0a1628 100%);border-bottom:0.5px solid rgba(148,197,47,0.2);padding:36px 20px 30px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;flex-shrink:0;">
-        <div style="font-size:54px;">🚗</div>
-        <div style="font-size:30px;font-weight:700;color:#fff;letter-spacing:-1px;">Aparkapp<span style="color:#94C52F;">.</span></div>
-        <div style="font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7;max-width:260px;">Conectamos conductores con cupos de parqueo privados en Bogotá.</div>
-        <div style="display:flex;gap:16px;margin-top:4px;">
+    mc.innerHTML = `<div style="flex:1;display:flex;flex-direction:column;background:linear-gradient(160deg,#11396D 0%,#0a1628 100%);overflow:hidden;">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 24px 0;gap:10px;min-height:0;">
+        <div style="font-size:44px;line-height:1;">🚗</div>
+        <div style="font-size:26px;font-weight:700;color:#fff;letter-spacing:-1px;">Aparkapp<span style="color:#94C52F;">.</span></div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.55);line-height:1.6;max-width:240px;">Conectamos conductores con cupos de parqueo privados en Bogotá.</div>
+        <div style="display:flex;gap:14px;margin-top:2px;">
           <div style="font-size:11px;color:rgba(148,197,47,0.85);">🔒 Verificado</div>
           <div style="font-size:11px;color:rgba(148,197,47,0.85);">🛡 Asegurado</div>
           <div style="font-size:11px;color:rgba(148,197,47,0.85);">⭐ Calificado</div>
         </div>
       </div>
-      <div class="ob-screen" style="justify-content:center;gap:12px;">
+      <div style="padding:20px 20px 36px;display:flex;flex-direction:column;gap:10px;flex-shrink:0;">
         <button class="ob-btn" onclick="goStep('register')">Crear cuenta</button>
         <button class="ob-btn secondary" onclick="goStep('register')">Ya tengo cuenta · Iniciar sesión</button>
       </div>
