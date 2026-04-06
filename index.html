@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Aparkapp</title>
@@ -12,57 +11,66 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    html, body { height: 100%; width: 100%; overflow: hidden; background: #0a1628; }
+    html, body { height: 100%; width: 100%; background: #0a1628; overflow: hidden; }
     :root {
       --ap-bg: #0a1628; --ap-surface: #0f2040; --ap-card: #152a52;
       --ap-border: rgba(255,255,255,0.09); --ap-accent: #94C52F; --ap-blue: #11396D;
-      --ap-blue-light: #1a4f96; --ap-text: #F1EFE8; --ap-muted: #7a9bc0; --ap-red: #E24B4A;
+      --ap-blue-light: #1a4f96; --ap-text: #F1EFE8; --ap-muted: #7a9bc0;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
-    .shell {
-      background: var(--ap-bg); color: var(--ap-text);
-      height: 100dvh; height: 100vh;
-      width: 100%; max-width: 480px;
-      margin: 0 auto;
+    #app {
+      position: fixed; inset: 0;
+      max-width: 480px; margin: 0 auto;
       display: flex; flex-direction: column;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: 14px; position: relative; overflow: hidden;
+      font-size: 14px; background: var(--ap-bg); color: var(--ap-text);
     }
     .topbar {
       background: var(--ap-blue); border-bottom: 0.5px solid rgba(148,197,47,0.2);
       padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
-      flex-shrink: 0;
+      flex-shrink: 0; padding-top: max(12px, env(safe-area-inset-top));
     }
-    .logo { font-size: 18px; font-weight: 600; letter-spacing: -0.5px; color: #fff; }
+    .logo { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; color: #fff; }
     .logo span { color: var(--ap-accent); }
     .role-toggle { display: flex; background: rgba(0,0,0,0.3); border-radius: 20px; padding: 3px; gap: 2px; }
-    .role-btn { padding: 5px 13px; border-radius: 18px; border: none; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.2s; color: rgba(255,255,255,0.5); background: transparent; }
+    .role-btn { padding: 5px 13px; border-radius: 18px; border: none; cursor: pointer; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.5); background: transparent; font-family: inherit; }
     .role-btn.active { background: var(--ap-accent); color: #0a1628; }
+    #main-content { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
     .tab-bar { background: var(--ap-surface); display: flex; border-bottom: 0.5px solid var(--ap-border); flex-shrink: 0; }
-    .tab { flex: 1; padding: 10px 0; text-align: center; font-size: 12px; font-weight: 500; color: var(--ap-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .tab { flex: 1; padding: 10px 0; text-align: center; font-size: 12px; font-weight: 500; color: var(--ap-muted); cursor: pointer; border-bottom: 2px solid transparent; }
     .tab.active { color: var(--ap-accent); border-bottom-color: var(--ap-accent); }
-    .content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; -webkit-overflow-scrolling: touch; }
-    .ob-wrap { flex: 1; display: flex; flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+    /* WELCOME */
+    .welcome-wrap { flex: 1; display: flex; flex-direction: column; min-height: 0; background: linear-gradient(160deg, #11396D 0%, #0a1628 100%); }
+    .welcome-hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px 28px; gap: 12px; min-height: 0; overflow: hidden; }
+    .welcome-btns { flex-shrink: 0; padding: 16px 20px; padding-bottom: calc(24px + var(--safe-bottom)); display: flex; flex-direction: column; gap: 10px; }
+
+    /* SCROLLABLE SCREENS */
+    .screen-wrap { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; }
+    .ob-screen { padding: 20px 18px; display: flex; flex-direction: column; gap: 14px; padding-bottom: calc(24px + var(--safe-bottom)); }
+    @keyframes fadeIn { from { opacity:0; transform:translateX(8px); } to { opacity:1; transform:translateX(0); } }
+    .ob-screen { animation: fadeIn 0.2s ease; }
     .progress-bar { height: 3px; background: var(--ap-card); flex-shrink: 0; }
     .progress-fill { height: 100%; background: var(--ap-accent); transition: width 0.4s ease; border-radius: 2px; }
-    .ob-screen { padding: 20px 18px; flex: 1; display: flex; flex-direction: column; gap: 14px; animation: fadeIn 0.25s ease; }
-    @keyframes fadeIn { from { opacity:0; transform:translateX(10px); } to { opacity:1; transform:translateX(0); } }
-    .ob-icon { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 2px; }
+    .ob-icon { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
     .ob-icon.accent { background: rgba(148,197,47,0.15); }
     .ob-icon.blue { background: rgba(17,57,109,0.4); border: 0.5px solid rgba(148,197,47,0.2); }
-    .ob-title { font-size: 20px; font-weight: 600; color: var(--ap-text); line-height: 1.3; }
+    .ob-title { font-size: 20px; font-weight: 700; color: var(--ap-text); line-height: 1.3; }
     .ob-sub { font-size: 13px; color: var(--ap-muted); line-height: 1.6; }
     .form-group { display: flex; flex-direction: column; gap: 5px; }
     .form-label { font-size: 11px; color: var(--ap-muted); font-weight: 500; letter-spacing: 0.3px; }
-    .form-input { background: var(--ap-card); border: 0.5px solid var(--ap-border); border-radius: 8px; padding: 11px 12px; color: var(--ap-text); font-size: 14px; outline: none; width: 100%; -webkit-appearance: none; }
+    .form-input { background: var(--ap-card); border: 0.5px solid var(--ap-border); border-radius: 8px; padding: 12px; color: var(--ap-text); font-size: 15px; outline: none; width: 100%; -webkit-appearance: none; font-family: inherit; }
     .form-input:focus { border-color: var(--ap-accent); }
     .form-input::placeholder { color: var(--ap-muted); }
-    select.form-input { background-image: none; }
-    .ob-btn { width: 100%; padding: 14px; border-radius: 10px; background: var(--ap-accent); color: #0a1628; border: none; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: auto; -webkit-appearance: none; }
-    .ob-btn.secondary { background: var(--ap-card); color: var(--ap-text); border: 0.5px solid rgba(148,197,47,0.25); margin-top: 0; }
-    .ob-link { text-align: center; font-size: 12px; color: var(--ap-muted); cursor: pointer; }
+    .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; -webkit-appearance: none; }
+    .btn-primary { background: var(--ap-accent); color: #0a1628; }
+    .btn-secondary { background: var(--ap-card); color: var(--ap-text); border: 0.5px solid rgba(148,197,47,0.25); }
+    .btn-confirm { background: var(--ap-accent); color: #0a1628; }
+    .ob-link { text-align: center; font-size: 13px; color: var(--ap-muted); cursor: pointer; }
     .ob-link span { color: var(--ap-accent); }
+    .step-back { font-size: 13px; color: var(--ap-muted); cursor: pointer; }
     .social-row { display: flex; gap: 8px; }
-    .social-btn { flex: 1; padding: 11px; border-radius: 8px; border: 0.5px solid var(--ap-border); background: var(--ap-card); color: var(--ap-text); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .social-btn { flex: 1; padding: 12px; border-radius: 10px; border: 0.5px solid var(--ap-border); background: var(--ap-card); color: var(--ap-text); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: inherit; }
     .divider { display: flex; align-items: center; gap: 10px; }
     .divider-line { flex: 1; height: 0.5px; background: var(--ap-border); }
     .divider-text { font-size: 11px; color: var(--ap-muted); }
@@ -71,458 +79,452 @@
     .fee-row:last-child { border-bottom: none; padding-top: 10px; }
     .fee-label { font-size: 12px; color: var(--ap-muted); }
     .fee-val { font-size: 13px; color: var(--ap-text); }
-    .fee-total-val { font-size: 18px; font-weight: 600; color: var(--ap-accent); }
+    .fee-total-val { font-size: 19px; font-weight: 700; color: var(--ap-accent); }
     .fee-strike { font-size: 11px; color: var(--ap-muted); text-decoration: line-through; margin-right: 4px; }
-    .launch-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(148,197,47,0.12); border-radius: 10px; padding: 2px 8px; font-size: 10px; color: var(--ap-accent); font-weight: 500; }
-    .info-box { background: rgba(148,197,47,0.07); border: 0.5px solid rgba(148,197,47,0.2); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #b8dc6a; line-height: 1.5; }
+    .launch-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(148,197,47,0.12); border-radius: 10px; padding: 2px 8px; font-size: 10px; color: var(--ap-accent); font-weight: 600; }
+    .info-box { background: rgba(148,197,47,0.07); border: 0.5px solid rgba(148,197,47,0.2); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: #b8dc6a; line-height: 1.5; }
     .info-box.blue { background: rgba(17,57,109,0.3); border-color: rgba(148,197,47,0.15); color: var(--ap-muted); }
     .card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .otp-row { display: flex; gap: 8px; justify-content: center; }
-    .otp-input { width: 42px; height: 52px; background: var(--ap-card); border: 0.5px solid var(--ap-border); border-radius: 8px; text-align: center; font-size: 22px; font-weight: 600; color: var(--ap-text); outline: none; -webkit-appearance: none; }
+    .otp-input { width: 44px; height: 54px; background: var(--ap-card); border: 0.5px solid var(--ap-border); border-radius: 10px; text-align: center; font-size: 24px; font-weight: 700; color: var(--ap-text); outline: none; -webkit-appearance: none; font-family: inherit; }
     .otp-input:focus { border-color: var(--ap-accent); }
     .otp-input.filled { border-color: rgba(148,197,47,0.5); }
     .upload-zone { border: 1px dashed rgba(148,197,47,0.3); border-radius: 12px; padding: 24px 16px; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .upload-zone.done { border-color: var(--ap-accent); background: rgba(148,197,47,0.06); }
     .upload-label { font-size: 13px; color: var(--ap-muted); }
     .upload-label strong { color: var(--ap-text); display: block; margin-bottom: 2px; }
-    .check-badge { width: 20px; height: 20px; border-radius: 50%; background: var(--ap-accent); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; color: #0a1628; }
+    .check-badge { width: 22px; height: 22px; border-radius: 50%; background: var(--ap-accent); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; color: #0a1628; }
     .selfie-frame { border-radius: 12px; background: var(--ap-card); height: 150px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; border: 0.5px solid var(--ap-border); cursor: pointer; }
     .face-outline { width: 76px; height: 90px; border: 2px solid rgba(148,197,47,0.5); border-radius: 50%; position: relative; overflow: hidden; }
     .scan-line { position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--ap-accent), transparent); animation: scan 2s ease-in-out infinite; }
     @keyframes scan { 0%,100%{top:10px;opacity:0.3} 50%{top:70px;opacity:1} }
-    .terms-scroll { background: var(--ap-card); border-radius: 8px; border: 0.5px solid var(--ap-border); padding: 12px 14px; max-height: 160px; overflow-y: auto; font-size: 12px; color: var(--ap-muted); line-height: 1.7; -webkit-overflow-scrolling: touch; }
+    .terms-scroll { background: var(--ap-card); border-radius: 10px; border: 0.5px solid var(--ap-border); padding: 12px 14px; max-height: 160px; overflow-y: auto; font-size: 12px; color: var(--ap-muted); line-height: 1.7; -webkit-overflow-scrolling: touch; }
     .terms-scroll h4 { color: var(--ap-text); font-size: 12px; font-weight: 600; margin: 10px 0 4px; }
     .terms-scroll h4:first-child { margin-top: 0; }
-    .check-row { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
-    .custom-check { width: 20px; height: 20px; border-radius: 5px; border: 0.5px solid var(--ap-border); background: var(--ap-card); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; transition: all 0.15s; font-size: 12px; }
+    .check-row { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; padding: 4px 0; }
+    .custom-check { width: 22px; height: 22px; border-radius: 6px; border: 0.5px solid var(--ap-border); background: var(--ap-card); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; }
     .custom-check.on { background: var(--ap-accent); border-color: var(--ap-accent); color: #0a1628; }
     .check-text { font-size: 13px; color: var(--ap-muted); line-height: 1.5; }
     .check-text span { color: var(--ap-accent); }
-    .success-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 20px; text-align: center; gap: 14px; }
-    .big-check { width: 72px; height: 72px; border-radius: 50%; background: rgba(148,197,47,0.15); border: 0.5px solid rgba(148,197,47,0.3); display: flex; align-items: center; justify-content: center; font-size: 32px; }
-    .feature-list { width: 100%; display: flex; flex-direction: column; gap: 10px; text-align: left; }
-    .feature-row { display: flex; gap: 10px; align-items: center; font-size: 13px; color: var(--ap-muted); }
-    .feature-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ap-accent); flex-shrink: 0; }
-    .verified-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(148,197,47,0.12); border-radius: 12px; padding: 5px 12px; font-size: 12px; color: var(--ap-accent); font-weight: 500; }
-    .step-back { font-size: 12px; color: var(--ap-muted); cursor: pointer; padding: 4px 0; }
-    .map-area { position: relative; height: 190px; background: #0a1e3a; flex-shrink: 0; overflow: hidden; }
+    .verified-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(148,197,47,0.12); border-radius: 12px; padding: 5px 12px; font-size: 12px; color: var(--ap-accent); font-weight: 600; }
+
+    /* APP SCREENS */
+    .app-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; position: relative; }
+    .map-area { position: relative; height: 200px; background: #0a1e3a; flex-shrink: 0; overflow: hidden; }
     .map-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(148,197,47,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(148,197,47,0.04) 1px,transparent 1px); background-size: 36px 36px; }
     .map-road-h { position: absolute; left:0; right:0; height:10px; background:rgba(17,57,109,0.6); }
     .map-road-v { position: absolute; top:0; bottom:0; width:10px; background:rgba(17,57,109,0.6); }
     .map-label { position:absolute; font-size:10px; color:var(--ap-muted); font-weight:500; white-space:nowrap; }
-    .map-pin { position:absolute; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:600; cursor:pointer; transition:transform 0.15s; border:2px solid var(--ap-bg); }
+    .map-pin { position:absolute; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; cursor:pointer; border:2px solid var(--ap-bg); }
     .map-pin.available { background:var(--ap-accent); color:#0a1628; }
-    .map-pin.selected { background:var(--ap-accent); transform:scale(1.25); box-shadow:0 0 0 5px rgba(148,197,47,0.25); }
+    .map-pin.selected { background:var(--ap-accent); box-shadow:0 0 0 5px rgba(148,197,47,0.25); }
     .map-pin.taken { background:var(--ap-card); color:var(--ap-muted); }
     .user-dot { position:absolute; width:14px; height:14px; border-radius:50%; background:var(--ap-blue-light); border:2px solid white; }
     .map-overlay { position:absolute; top:10px; left:10px; background:var(--ap-blue); border-radius:8px; padding:6px 10px; font-size:11px; color:var(--ap-muted); border:0.5px solid rgba(148,197,47,0.2); }
     .map-overlay strong { color:var(--ap-text); }
     .search-bar { padding:10px 14px; background:var(--ap-surface); border-bottom:0.5px solid var(--ap-border); display:flex; gap:8px; align-items:center; flex-shrink: 0; }
-    .search-input { flex:1; background:var(--ap-card); border:0.5px solid var(--ap-border); border-radius:8px; padding:9px 12px; color:var(--ap-text); font-size:13px; outline:none; -webkit-appearance: none; }
+    .search-input { flex:1; background:var(--ap-card); border:0.5px solid var(--ap-border); border-radius:8px; padding:10px 12px; color:var(--ap-text); font-size:14px; outline:none; -webkit-appearance:none; font-family:inherit; }
     .search-input::placeholder { color:var(--ap-muted); }
-    .filter-pill { padding:6px 10px; border-radius:20px; border:0.5px solid var(--ap-border); background:var(--ap-card); font-size:11px; color:var(--ap-muted); cursor:pointer; white-space:nowrap; }
+    .filter-pill { padding:7px 11px; border-radius:20px; border:0.5px solid var(--ap-border); background:var(--ap-card); font-size:11px; color:var(--ap-muted); cursor:pointer; white-space:nowrap; }
     .filter-pill.on { border-color:var(--ap-accent); color:var(--ap-accent); background:rgba(148,197,47,0.08); }
     .list-section { padding:12px 14px; }
     .section-label { font-size:11px; font-weight:600; color:var(--ap-muted); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px; }
     .spot-card { background:var(--ap-card); border-radius:12px; border:0.5px solid var(--ap-border); padding:12px 14px; margin-bottom:10px; cursor:pointer; display:flex; gap:12px; align-items:flex-start; }
     .spot-card.selected { border-color:var(--ap-accent); }
-    .spot-icon { width:38px; height:38px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .spot-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .spot-icon.bldg { background:rgba(148,197,47,0.12); }
     .spot-icon.home { background:rgba(17,57,109,0.5); }
-    .spot-info { flex:1; min-width: 0; }
-    .spot-name { font-size:13px; font-weight:600; color:var(--ap-text); margin-bottom:3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .spot-info { flex:1; min-width:0; }
+    .spot-name { font-size:13px; font-weight:600; color:var(--ap-text); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .spot-meta { font-size:11px; color:var(--ap-muted); display:flex; gap:8px; flex-wrap:wrap; }
-    .spot-badge { font-size:10px; padding:2px 7px; border-radius:10px; background:rgba(148,197,47,0.15); color:var(--ap-accent); font-weight:500; }
+    .spot-badge { font-size:10px; padding:2px 7px; border-radius:10px; background:rgba(148,197,47,0.15); color:var(--ap-accent); font-weight:600; }
     .spot-right { text-align:right; flex-shrink:0; }
-    .spot-price { font-size:15px; font-weight:600; color:var(--ap-accent); }
+    .spot-price { font-size:15px; font-weight:700; color:var(--ap-accent); }
     .spot-unit { font-size:10px; color:var(--ap-muted); }
     .spot-dist { font-size:11px; color:var(--ap-muted); margin-top:2px; }
     .stars { color:var(--ap-accent); font-size:10px; }
-    .booking-panel { position:absolute; bottom:0; left:0; right:0; background:var(--ap-surface); border-top:0.5px solid rgba(148,197,47,0.2); border-radius:16px 16px 0 0; padding:16px; animation:slideUp 0.25s ease; z-index: 10; }
+    .booking-panel { position:absolute; bottom:0; left:0; right:0; background:var(--ap-surface); border-top:0.5px solid rgba(148,197,47,0.2); border-radius:16px 16px 0 0; padding:16px; padding-bottom:calc(16px + var(--safe-bottom)); z-index:10; animation:slideUp 0.25s ease; }
     @keyframes slideUp { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
-    .panel-title { font-size:14px; font-weight:600; margin-bottom:12px; color:var(--ap-text); display:flex; justify-content:space-between; }
-    .close-btn { color:var(--ap-muted); cursor:pointer; font-size:20px; line-height: 1; }
+    .panel-title { font-size:14px; font-weight:600; margin-bottom:12px; color:var(--ap-text); display:flex; justify-content:space-between; align-items:center; }
+    .close-btn { color:var(--ap-muted); cursor:pointer; font-size:22px; line-height:1; }
     .time-select { display:flex; gap:6px; margin-bottom:12px; }
-    .time-opt { flex: 1; padding:8px 0; border-radius:8px; border:0.5px solid var(--ap-border); background:var(--ap-card); font-size:13px; color:var(--ap-muted); cursor:pointer; text-align: center; }
+    .time-opt { flex:1; padding:10px 0; border-radius:8px; border:0.5px solid var(--ap-border); background:var(--ap-card); font-size:14px; color:var(--ap-muted); cursor:pointer; text-align:center; font-family:inherit; }
     .time-opt.on { border-color:var(--ap-accent); color:var(--ap-accent); background:rgba(148,197,47,0.08); }
-    .price-summary { background:var(--ap-card); border-radius:8px; padding:10px 12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; }
+    .price-summary { background:var(--ap-card); border-radius:10px; padding:12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; }
     .price-label { font-size:12px; color:var(--ap-muted); }
-    .price-total { font-size:20px; font-weight:600; color:var(--ap-accent); }
-    .confirm-btn { width:100%; padding:14px; border-radius:10px; background:var(--ap-accent); color:#0a1628; border:none; font-size:15px; font-weight:600; cursor:pointer; -webkit-appearance: none; }
-    .res-success { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:36px 20px; text-align:center; gap:14px; flex:1; }
-    .check-circle { width:64px; height:64px; border-radius:50%; background:rgba(148,197,47,0.15); display:flex; align-items:center; justify-content:center; font-size:28px; }
+    .price-total { font-size:22px; font-weight:700; color:var(--ap-accent); }
     .qr-grid { display:grid; grid-template-columns:repeat(8,1fr); gap:2px; width:80px; }
     .qr-cell { width:8px; height:8px; border-radius:1px; }
-    .back-btn { padding:12px 28px; border-radius:10px; border:0.5px solid var(--ap-border); background:var(--ap-card); color:var(--ap-text); font-size:13px; cursor:pointer; margin-top:8px; }
-    .host-wrap { padding:14px; display:flex; flex-direction:column; gap:10px; }
     .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
     .stat-card { background:var(--ap-card); border-radius:12px; border:0.5px solid var(--ap-border); padding:12px; }
     .stat-label { font-size:11px; color:var(--ap-muted); margin-bottom:6px; }
-    .stat-val { font-size:20px; font-weight:600; color:var(--ap-text); }
+    .stat-val { font-size:20px; font-weight:700; color:var(--ap-text); }
     .stat-val.accent { color:var(--ap-accent); }
     .bar-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
     .bar-day { font-size:10px; color:var(--ap-muted); width:18px; }
     .bar-track { flex:1; height:6px; background:var(--ap-bg); border-radius:3px; overflow:hidden; }
     .bar-fill { height:100%; border-radius:3px; background:var(--ap-accent); }
     .bar-amt { font-size:10px; color:var(--ap-muted); width:36px; text-align:right; }
-    .toggle-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:0.5px solid var(--ap-border); }
+    .toggle-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:0.5px solid var(--ap-border); }
     .toggle-label { font-size:13px; color:var(--ap-text); }
-    .toggle-switch { width:40px; height:22px; border-radius:11px; cursor:pointer; transition:background 0.2s; position:relative; flex-shrink:0; }
-    .toggle-switch.on { background:var(--ap-accent); }
-    .toggle-switch.off { background:var(--ap-card); border:0.5px solid var(--ap-border); }
-    .toggle-knob { position:absolute; width:16px; height:16px; border-radius:50%; background:white; top:3px; transition:left 0.2s; }
-    .toggle-switch.on .toggle-knob { left:21px; }
-    .toggle-switch.off .toggle-knob { left:3px; }
-    .chip { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:10px; font-size:11px; font-weight:500; }
+    .toggle-sw { width:44px; height:24px; border-radius:12px; cursor:pointer; transition:background 0.2s; position:relative; flex-shrink:0; }
+    .toggle-sw.on { background:var(--ap-accent); }
+    .toggle-sw.off { background:var(--ap-card); border:0.5px solid var(--ap-border); }
+    .toggle-knob { position:absolute; width:18px; height:18px; border-radius:50%; background:white; top:3px; transition:left 0.2s; }
+    .toggle-sw.on .toggle-knob { left:23px; }
+    .toggle-sw.off .toggle-knob { left:3px; }
+    .chip { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:10px; font-size:11px; font-weight:600; }
     .chip-on { background:rgba(148,197,47,0.15); color:var(--ap-accent); }
     .chip-off { background:rgba(17,57,109,0.4); color:var(--ap-muted); }
-    .host-form-btn { width:100%; padding:14px; border-radius:10px; background:var(--ap-accent); color:#0a1628; border:none; font-size:15px; font-weight:600; cursor:pointer; -webkit-appearance: none; }
   </style>
 </head>
 <body>
-<div class="shell" id="app">
+<div id="app">
   <div class="topbar">
     <div class="logo">Aparkapp<span>.</span></div>
     <div id="topbar-right"></div>
   </div>
-  <div id="main-content" style="flex:1;display:flex;flex-direction:column;overflow:hidden;"></div>
+  <div id="main-content"></div>
 </div>
-
 <script>
-let step = 'welcome', role = 'driver', driverTab = 'search', hostTab = 'dash';
-let selectedSpot = null, bookingStep = 'list', selectedTime = 2;
-let checks = { terms:false, privacy:false, seguro:false };
-let otpVals = ['','','','','',''];
-let selfieState = 'idle', idFront = false, idBack = false;
+let step='welcome', role='driver', driverTab='search', hostTab='dash';
+let selectedSpot=null, bookingStep='list', selectedTime=2;
+let checks={terms:false,privacy:false,seguro:false};
+let otpVals=['','','','','',''];
+let selfieState='idle', idFront=false, idBack=false;
 
-const spots = [
+const spots=[
   {id:1,name:'Parqueadero Chapinero',type:'bldg',price:3200,unit:'hora',dist:'180m',rating:4.8,reviews:42,available:true,pin:{x:'38%',y:'35%'}},
   {id:2,name:'Cupo residencial · Altos',type:'home',price:2500,unit:'hora',dist:'220m',rating:4.6,reviews:18,available:true,pin:{x:'55%',y:'28%'}},
   {id:3,name:'Parking Zona Rosa',type:'bldg',price:4000,unit:'hora',dist:'1.2km',rating:4.9,reviews:87,available:true,pin:{x:'72%',y:'55%'}},
   {id:4,name:'Cupo privado · Torres',type:'home',price:1800,unit:'hora',dist:'650m',rating:4.4,reviews:11,available:false,pin:{x:'25%',y:'62%'}},
 ];
 
-function goStep(s) { step=s; render(); }
-function stars(n) { return '<span class="stars">'+'★'.repeat(Math.round(n))+'</span>'; }
+const go=s=>{step=s;render();};
+const stars=n=>'<span class="stars">'+'★'.repeat(Math.round(n))+'</span>';
 
-function setRole(r) {
-  role = r;
-  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
-  const btn = document.getElementById('btn-'+r);
-  if(btn) btn.classList.add('active');
+function setRole(r){
+  role=r;
+  document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('active'));
+  const b=document.getElementById('btn-'+r);
+  if(b)b.classList.add('active');
   renderApp();
 }
 
-function renderTopbarRight() {
-  const el = document.getElementById('topbar-right');
-  if(step === 'app') {
-    el.innerHTML = `<div style="display:flex;background:rgba(0,0,0,0.3);border-radius:20px;padding:3px;gap:2px;">
+function renderTopbar(){
+  const el=document.getElementById('topbar-right');
+  if(step==='app'){
+    el.innerHTML=`<div class="role-toggle">
       <button class="role-btn${role==='driver'?' active':''}" id="btn-driver" onclick="setRole('driver')">Conductor</button>
       <button class="role-btn${role==='host'?' active':''}" id="btn-host" onclick="setRole('host')">Anfitrión</button>
     </div>`;
-  } else { el.innerHTML = ''; }
+  } else { el.innerHTML=''; }
 }
 
-function render() {
-  renderTopbarRight();
-  const mc = document.getElementById('main-content');
+function render(){
+  renderTopbar();
+  const mc=document.getElementById('main-content');
 
-  if(step==='welcome') {
-    mc.innerHTML = `<div style="flex:1;display:flex;flex-direction:column;background:linear-gradient(160deg,#11396D 0%,#0a1628 100%);overflow:hidden;">
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 24px 0;gap:10px;min-height:0;">
-        <div style="font-size:44px;line-height:1;">🚗</div>
-        <div style="font-size:26px;font-weight:700;color:#fff;letter-spacing:-1px;">Aparkapp<span style="color:#94C52F;">.</span></div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.55);line-height:1.6;max-width:240px;">Conectamos conductores con cupos de parqueo privados en Bogotá.</div>
-        <div style="display:flex;gap:14px;margin-top:2px;">
-          <div style="font-size:11px;color:rgba(148,197,47,0.85);">🔒 Verificado</div>
-          <div style="font-size:11px;color:rgba(148,197,47,0.85);">🛡 Asegurado</div>
-          <div style="font-size:11px;color:rgba(148,197,47,0.85);">⭐ Calificado</div>
+  if(step==='welcome'){
+    mc.innerHTML=`<div class="welcome-wrap">
+      <div class="welcome-hero">
+        <div style="font-size:48px;line-height:1">🚗</div>
+        <div style="font-size:28px;font-weight:700;color:#fff;letter-spacing:-1px">Aparkapp<span style="color:#94C52F">.</span></div>
+        <div style="font-size:14px;color:rgba(255,255,255,0.55);line-height:1.6;max-width:240px">Conectamos conductores con cupos de parqueo privados en Bogotá.</div>
+        <div style="display:flex;gap:16px">
+          <div style="font-size:11px;color:rgba(148,197,47,0.85)">🔒 Verificado</div>
+          <div style="font-size:11px;color:rgba(148,197,47,0.85)">🛡 Asegurado</div>
+          <div style="font-size:11px;color:rgba(148,197,47,0.85)">⭐ Calificado</div>
         </div>
       </div>
-      <div style="padding:20px 20px 36px;display:flex;flex-direction:column;gap:10px;flex-shrink:0;">
-        <button class="ob-btn" onclick="goStep('register')">Crear cuenta</button>
-        <button class="ob-btn secondary" onclick="goStep('register')">Ya tengo cuenta · Iniciar sesión</button>
-      </div>
-    </div>`;
-    return;
-  }
-
-  if(step==='register') {
-    mc.innerHTML = `<div class="ob-wrap">
-      <div class="progress-bar"><div class="progress-fill" style="width:12%"></div></div>
-      <div class="ob-screen">
-        <div class="step-back" onclick="goStep('welcome')">← Volver</div>
-        <div class="ob-icon accent">👤</div>
-        <div class="ob-title">Crear tu cuenta</div>
-        <div class="ob-sub">Ingresa tus datos para empezar a usar Aparkapp.</div>
-        <div class="social-row">
-          <button class="social-btn" onclick="goStep('phone_otp')">🇬 Google</button>
-          <button class="social-btn" onclick="goStep('phone_otp')">📘 Facebook</button>
-        </div>
-        <div class="divider"><div class="divider-line"></div><div class="divider-text">o con email</div><div class="divider-line"></div></div>
-        <div class="form-group"><div class="form-label">Nombre completo</div><input class="form-input" placeholder="Luis Carlos Medina" /></div>
-        <div class="form-group"><div class="form-label">Correo electrónico</div><input class="form-input" type="email" placeholder="luis@correo.com" /></div>
-        <div class="form-group"><div class="form-label">Número de celular</div>
-          <div style="display:flex;gap:6px;"><input class="form-input" value="+57" style="width:54px;" readonly /><input class="form-input" placeholder="300 123 4567" style="flex:1;" /></div>
-        </div>
-        <div class="form-group"><div class="form-label">Contraseña</div><input class="form-input" type="password" placeholder="Mínimo 8 caracteres" /></div>
-        <button class="ob-btn" onclick="goStep('phone_otp')">Continuar</button>
-        <div class="ob-link">¿Ya tienes cuenta? <span onclick="goStep('phone_otp')">Inicia sesión</span></div>
+      <div class="welcome-btns">
+        <button class="btn btn-primary" onclick="go('register')">Crear cuenta</button>
+        <button class="btn btn-secondary" onclick="go('register')">Ya tengo cuenta · Iniciar sesión</button>
       </div>
     </div>`;
     return;
   }
 
-  if(step==='phone_otp') {
-    mc.innerHTML = `<div class="ob-wrap">
-      <div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
-      <div class="ob-screen">
-        <div class="step-back" onclick="goStep('register')">← Volver</div>
-        <div class="ob-icon blue">📱</div>
-        <div class="ob-title">Verifica tu número</div>
-        <div class="ob-sub">Enviamos un código de 6 dígitos a <strong style="color:#F1EFE8">+57 300 123 4567</strong>.</div>
-        <div class="otp-row">${[0,1,2,3,4,5].map(i=>`<input class="otp-input${otpVals[i]?' filled':''}" maxlength="1" inputmode="numeric" id="otp-${i}" value="${otpVals[i]}" oninput="handleOtp(${i},this.value)" onkeydown="handleOtpKey(event,${i})" />`).join('')}</div>
-        <div style="text-align:center;font-size:13px;color:var(--ap-muted);">¿No recibiste el código? <span style="color:var(--ap-accent);cursor:pointer;">Reenviar</span></div>
-        <div style="margin-top:auto;">
-          <button class="ob-btn" onclick="fillOtpAndNext()">Verificar código</button>
-          <div style="margin-top:12px;" class="ob-link">Demo: <span onclick="fillOtpAndNext()">Usar código de prueba</span></div>
-        </div>
+  if(step==='register'){
+    mc.innerHTML=`<div style="flex-shrink:0"><div class="progress-bar"><div class="progress-fill" style="width:12%"></div></div></div>
+    <div class="screen-wrap"><div class="ob-screen">
+      <div class="step-back" onclick="go('welcome')">← Volver</div>
+      <div class="ob-icon accent">👤</div>
+      <div class="ob-title">Crear tu cuenta</div>
+      <div class="ob-sub">Ingresa tus datos para empezar a usar Aparkapp.</div>
+      <div class="social-row">
+        <button class="social-btn" onclick="go('phone_otp')">🇬 Google</button>
+        <button class="social-btn" onclick="go('phone_otp')">📘 Facebook</button>
       </div>
-    </div>`;
+      <div class="divider"><div class="divider-line"></div><div class="divider-text">o con email</div><div class="divider-line"></div></div>
+      <div class="form-group"><div class="form-label">Nombre completo</div><input class="form-input" placeholder="Luis Carlos Medina"/></div>
+      <div class="form-group"><div class="form-label">Correo electrónico</div><input class="form-input" type="email" placeholder="luis@correo.com"/></div>
+      <div class="form-group"><div class="form-label">Número de celular</div>
+        <div style="display:flex;gap:6px"><input class="form-input" value="+57" style="width:54px" readonly/><input class="form-input" placeholder="300 123 4567" style="flex:1"/></div>
+      </div>
+      <div class="form-group"><div class="form-label">Contraseña</div><input class="form-input" type="password" placeholder="Mínimo 8 caracteres"/></div>
+      <button class="btn btn-primary" onclick="go('phone_otp')">Continuar</button>
+      <div class="ob-link">¿Ya tienes cuenta? <span onclick="go('phone_otp')">Inicia sesión</span></div>
+    </div></div>`;
     return;
   }
 
-  if(step==='verify_fee') {
-    mc.innerHTML = `<div class="ob-wrap">
-      <div class="progress-bar"><div class="progress-fill" style="width:37%"></div></div>
-      <div class="ob-screen">
-        <div class="step-back" onclick="goStep('phone_otp')">← Volver</div>
-        <div class="ob-icon blue">🛡</div>
-        <div class="ob-title">Verificación de identidad</div>
-        <div class="ob-sub">Para garantizar la seguridad de todos, Aparkapp realiza una verificación única de identidad.</div>
-        <div class="fee-card">
-          <div class="fee-row"><span class="fee-label">Verificación de documento (CC)</span><span class="fee-val">$2.100</span></div>
-          <div class="fee-row"><span class="fee-label">Verificación biométrica (selfie)</span><span class="fee-val">$1.400</span></div>
-          <div class="fee-row"><span class="fee-label">Póliza de seguro inicial</span><span class="fee-val">$1.100</span></div>
-          <div class="fee-row"><span class="fee-label">IVA (19%)</span><span class="fee-val">$875</span></div>
-          <div class="fee-row">
-            <div><div class="fee-label" style="color:#F1EFE8;font-weight:600;">Total a pagar</div><div style="margin-top:4px;"><span class="launch-badge">🎉 Precio de lanzamiento</span></div></div>
-            <div style="text-align:right;"><span class="fee-strike">$10.571</span><span class="fee-total-val"> $4.990</span></div>
-          </div>
-        </div>
-        <div class="info-box">Cobro único y permanente. Cubre tu verificación durante toda la vida de tu cuenta.</div>
-        <div class="info-box blue">Pago seguro procesado por Wompi · Encriptación SSL</div>
-        <button class="ob-btn" onclick="goStep('payment')">Continuar con el pago</button>
-        <div class="ob-link">Ver política de privacidad</div>
-      </div>
-    </div>`;
+  if(step==='phone_otp'){
+    mc.innerHTML=`<div style="flex-shrink:0"><div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div></div>
+    <div class="screen-wrap"><div class="ob-screen">
+      <div class="step-back" onclick="go('register')">← Volver</div>
+      <div class="ob-icon blue">📱</div>
+      <div class="ob-title">Verifica tu número</div>
+      <div class="ob-sub">Enviamos un código a <strong style="color:#F1EFE8">+57 300 123 4567</strong>.</div>
+      <div class="otp-row">${[0,1,2,3,4,5].map(i=>`<input class="otp-input${otpVals[i]?' filled':''}" maxlength="1" inputmode="numeric" id="otp-${i}" value="${otpVals[i]}" oninput="handleOtp(${i},this.value)" onkeydown="handleOtpKey(event,${i})"/>`).join('')}</div>
+      <div style="text-align:center;font-size:13px;color:var(--ap-muted)">¿No recibiste el código? <span style="color:#94C52F;cursor:pointer">Reenviar</span></div>
+      <button class="btn btn-primary" onclick="fillOtpAndNext()">Verificar código</button>
+      <div class="ob-link">Demo: <span onclick="fillOtpAndNext()">Usar código de prueba</span></div>
+    </div></div>`;
     return;
   }
 
-  if(step==='payment') {
-    mc.innerHTML = `<div class="ob-wrap">
-      <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
-      <div class="ob-screen">
-        <div class="step-back" onclick="goStep('verify_fee')">← Volver</div>
-        <div class="ob-icon accent">💳</div>
-        <div class="ob-title">Método de pago</div>
-        <div class="ob-sub">Pago único · <strong style="color:#94C52F;">$4.990 COP</strong></div>
-        <div style="display:flex;gap:8px;">
-          ${['💳 Tarjeta','🏦 PSE','📲 Nequi'].map((m,i)=>`<div class="filter-pill${i===0?' on':''}" onclick="document.querySelectorAll('.filter-pill').forEach(e=>e.classList.remove('on'));this.classList.add('on')">${m}</div>`).join('')}
+  if(step==='verify_fee'){
+    mc.innerHTML=`<div style="flex-shrink:0"><div class="progress-bar"><div class="progress-fill" style="width:37%"></div></div></div>
+    <div class="screen-wrap"><div class="ob-screen">
+      <div class="step-back" onclick="go('phone_otp')">← Volver</div>
+      <div class="ob-icon blue">🛡</div>
+      <div class="ob-title">Verificación de identidad</div>
+      <div class="ob-sub">Verificación única para garantizar la seguridad de todos.</div>
+      <div class="fee-card">
+        <div class="fee-row"><span class="fee-label">Verificación de documento (CC)</span><span class="fee-val">$2.100</span></div>
+        <div class="fee-row"><span class="fee-label">Verificación biométrica (selfie)</span><span class="fee-val">$1.400</span></div>
+        <div class="fee-row"><span class="fee-label">Póliza de seguro inicial</span><span class="fee-val">$1.100</span></div>
+        <div class="fee-row"><span class="fee-label">IVA (19%)</span><span class="fee-val">$875</span></div>
+        <div class="fee-row">
+          <div><div class="fee-label" style="color:#F1EFE8;font-weight:600">Total a pagar</div><div style="margin-top:4px"><span class="launch-badge">🎉 Precio de lanzamiento</span></div></div>
+          <div style="text-align:right"><span class="fee-strike">$10.571</span><span class="fee-total-val"> $4.990</span></div>
         </div>
-        <div class="form-group"><div class="form-label">Número de tarjeta</div><input class="form-input" placeholder="1234 5678 9012 3456" inputmode="numeric" /></div>
-        <div class="form-group"><div class="form-label">Nombre en la tarjeta</div><input class="form-input" placeholder="LUIS C MEDINA" /></div>
-        <div class="card-row">
-          <div class="form-group"><div class="form-label">Vencimiento</div><input class="form-input" placeholder="MM/AA" inputmode="numeric" /></div>
-          <div class="form-group"><div class="form-label">CVV</div><input class="form-input" placeholder="123" type="password" inputmode="numeric" /></div>
-        </div>
-        <div style="font-size:12px;color:var(--ap-muted);">🔒 Pago encriptado · Wompi · PCI-DSS</div>
-        <button class="ob-btn" onclick="goStep('id_upload')">Pagar $4.990</button>
       </div>
-    </div>`;
+      <div class="info-box">Cobro único. Cubre tu verificación por siempre.</div>
+      <div class="info-box blue">Pago seguro · Wompi · Encriptación SSL</div>
+      <button class="btn btn-primary" onclick="go('payment')">Continuar con el pago</button>
+    </div></div>`;
     return;
   }
 
-  if(step==='id_upload') {
-    mc.innerHTML = `<div class="ob-wrap">
-      <div class="progress-bar"><div class="progress-fill" style="width:62%"></div></div>
-      <div class="ob-screen">
-        <div class="step-back" onclick="goStep('payment')">← Volver</div>
-        <div class="ob-icon blue">🪪</div>
-        <div class="ob-title">Sube tu documento</div>
-        <div class="ob-sub">Foto clara de tu cédula por ambas caras.</div>
-        <div class="upload-zone${idFront?' done':''}" onclick="idFront=true;render()">
-          ${idFront?`<div class="check-badge">✓</div><div class="upload-label"><strong style="color:#94C52F;">Frente cargado</strong>cédula_frente.jpg</div>`:`<div style="font-size:28px;">📄</div><div class="upload-label"><strong>Frente de la cédula</strong>Toca para cargar</div>`}
-        </div>
-        <div class="upload-zone${idBack?' done':''}" onclick="idBack=true;render()">
-          ${idBack?`<div class="check-badge">✓</div><div class="upload-label"><strong style="color:#94C52F;">Reverso cargado</strong>cédula_reverso.jpg</div>`:`<div style="font-size:28px;">📄</div><div class="upload-label"><strong>Reverso de la cédula</strong>Toca para cargar</div>`}
-        </div>
-        <div class="info-box">Documentos procesados de forma segura.</div>
-        <button class="ob-btn" onclick="goStep('selfie')" ${idFront&&idBack?'':'style="opacity:0.4;pointer-events:none;"'}>Continuar</button>
-        ${!idFront||!idBack?`<div style="text-align:center;font-size:12px;color:var(--ap-muted);">Carga ambas caras para continuar</div>`:''}
+  if(step==='payment'){
+    mc.innerHTML=`<div style="flex-shrink:0"><div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div></div>
+    <div class="screen-wrap"><div class="ob-screen">
+      <div class="step-back" onclick="go('verify_fee')">← Volver</div>
+      <div class="ob-icon accent">💳</div>
+      <div class="ob-title">Método de pago</div>
+      <div class="ob-sub">Pago único · <strong style="color:#94C52F">$4.990 COP</strong></div>
+      <div style="display:flex;gap:8px">
+        ${['💳 Tarjeta','🏦 PSE','📲 Nequi'].map((m,i)=>`<div class="filter-pill${i===0?' on':''}" onclick="document.querySelectorAll('.filter-pill').forEach(e=>e.classList.remove('on'));this.classList.add('on')">${m}</div>`).join('')}
       </div>
-    </div>`;
+      <div class="form-group"><div class="form-label">Número de tarjeta</div><input class="form-input" placeholder="1234 5678 9012 3456" inputmode="numeric"/></div>
+      <div class="form-group"><div class="form-label">Nombre en la tarjeta</div><input class="form-input" placeholder="LUIS C MEDINA"/></div>
+      <div class="card-row">
+        <div class="form-group"><div class="form-label">Vencimiento</div><input class="form-input" placeholder="MM/AA" inputmode="numeric"/></div>
+        <div class="form-group"><div class="form-label">CVV</div><input class="form-input" placeholder="123" type="password" inputmode="numeric"/></div>
+      </div>
+      <div style="font-size:12px;color:var(--ap-muted)">🔒 Pago encriptado · Wompi · PCI-DSS</div>
+      <button class="btn btn-primary" onclick="go('id_upload')">Pagar $4.990</button>
+    </div></div>`;
     return;
   }
 
-  if(step==='selfie') {
-    mc.innerHTML = `<div class="ob-wrap">
-      <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
-      <div class="ob-screen">
-        <div class="step-back" onclick="goStep('id_upload')">← Volver</div>
-        <div class="ob-icon accent">🤳</div>
-        <div class="ob-title">Verificación biométrica</div>
-        <div class="ob-sub">Selfie para confirmar tu identidad.</div>
-        <div class="selfie-frame" onclick="takeSelfie()">
-          ${selfieState==='idle'?`<div class="face-outline"><div class="scan-line"></div></div><div style="font-size:12px;color:var(--ap-muted);margin-top:8px;">Toca para activar cámara</div>`:selfieState==='scanning'?`<div class="face-outline"><div class="scan-line"></div></div><div style="font-size:12px;color:#94C52F;">Escaneando… no te muevas</div>`:`<div style="font-size:36px;">😊</div><div style="font-size:13px;color:#94C52F;margin-top:6px;">✓ Selfie capturada</div>`}
-        </div>
-        ${selfieState==='done'?`<div class="info-box">Biometría verificada correctamente.</div>`:`<div style="font-size:12px;color:var(--ap-muted);line-height:1.7;">• Iluminación frontal<br>• Sin gafas de sol<br>• Mira directo a la cámara</div>`}
-        <button class="ob-btn" onclick="${selfieState==='done'?'goStep(\'terms\')':'takeSelfie()'}" ${selfieState==='scanning'?'style="opacity:0.4;pointer-events:none;"':''}>
-          ${selfieState==='done'?'Continuar':'Capturar selfie'}
-        </button>
+  if(step==='id_upload'){
+    mc.innerHTML=`<div style="flex-shrink:0"><div class="progress-bar"><div class="progress-fill" style="width:62%"></div></div></div>
+    <div class="screen-wrap"><div class="ob-screen">
+      <div class="step-back" onclick="go('payment')">← Volver</div>
+      <div class="ob-icon blue">🪪</div>
+      <div class="ob-title">Sube tu documento</div>
+      <div class="ob-sub">Foto clara de tu cédula por ambas caras.</div>
+      <div class="upload-zone${idFront?' done':''}" onclick="idFront=true;render()">
+        ${idFront?`<div class="check-badge">✓</div><div class="upload-label"><strong style="color:#94C52F">Frente cargado</strong>cédula_frente.jpg</div>`:`<div style="font-size:28px">📄</div><div class="upload-label"><strong>Frente de la cédula</strong>Toca para cargar</div>`}
       </div>
-    </div>`;
+      <div class="upload-zone${idBack?' done':''}" onclick="idBack=true;render()">
+        ${idBack?`<div class="check-badge">✓</div><div class="upload-label"><strong style="color:#94C52F">Reverso cargado</strong>cédula_reverso.jpg</div>`:`<div style="font-size:28px">📄</div><div class="upload-label"><strong>Reverso de la cédula</strong>Toca para cargar</div>`}
+      </div>
+      <div class="info-box">Documentos procesados de forma segura.</div>
+      <button class="btn btn-primary" onclick="go('selfie')" ${idFront&&idBack?'':'style="opacity:0.4;pointer-events:none"'}>Continuar</button>
+      ${!idFront||!idBack?`<div style="text-align:center;font-size:12px;color:var(--ap-muted)">Carga ambas caras para continuar</div>`:''}
+    </div></div>`;
     return;
   }
 
-  if(step==='terms') {
-    const all = checks.terms&&checks.privacy&&checks.seguro;
-    mc.innerHTML = `<div class="ob-wrap">
-      <div class="progress-bar"><div class="progress-fill" style="width:88%"></div></div>
-      <div class="ob-screen">
-        <div class="step-back" onclick="goStep('selfie')">← Volver</div>
-        <div class="ob-icon accent">📋</div>
-        <div class="ob-title">Términos y condiciones</div>
-        <div class="terms-scroll">
-          <h4>1. Uso de la plataforma</h4>Aparkapp es una plataforma de intermediación digital. El uso implica aceptar estas condiciones. Nos reservamos el derecho de suspender cuentas que infrinjan las normas.<h4>2. Responsabilidades del conductor</h4>Acepta usar el cupo en el horario pactado, respetar las normas del anfitrión y responder por daños.<h4>3. Cancelaciones</h4>Más de 30 min de anticipación: reembolso del 100%. Tardías: penalidad del 50%.<h4>4. Seguro y responsabilidad civil</h4>Cada transacción incluye póliza básica. Incidentes deben reportarse en 24 horas.<h4>5. Protección de datos</h4>Tratamos tus datos conforme a la Ley 1581 de 2012. Información biométrica solo para verificación.
-        </div>
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <div class="check-row" onclick="toggleCheck('terms')"><div class="custom-check${checks.terms?' on':''}">✓</div><div class="check-text">Acepto los <span>Términos y Condiciones</span></div></div>
-          <div class="check-row" onclick="toggleCheck('privacy')"><div class="custom-check${checks.privacy?' on':''}">✓</div><div class="check-text">Acepto la <span>Política de Privacidad</span> y tratamiento de datos</div></div>
-          <div class="check-row" onclick="toggleCheck('seguro')"><div class="custom-check${checks.seguro?' on':''}">✓</div><div class="check-text">Acepto las condiciones de la <span>Póliza de Seguro</span></div></div>
-        </div>
-        <button class="ob-btn" onclick="${all?'goStep(\'done\')':'void(0)'}" style="${all?'':'opacity:0.4;pointer-events:none;'}">Activar mi cuenta</button>
-        ${!all?`<div style="text-align:center;font-size:12px;color:var(--ap-muted);">Acepta todos los puntos para continuar</div>`:''}
+  if(step==='selfie'){
+    mc.innerHTML=`<div style="flex-shrink:0"><div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div></div>
+    <div class="screen-wrap"><div class="ob-screen">
+      <div class="step-back" onclick="go('id_upload')">← Volver</div>
+      <div class="ob-icon accent">🤳</div>
+      <div class="ob-title">Verificación biométrica</div>
+      <div class="ob-sub">Selfie para confirmar tu identidad.</div>
+      <div class="selfie-frame" onclick="takeSelfie()">
+        ${selfieState==='idle'?`<div class="face-outline"><div class="scan-line"></div></div><div style="font-size:12px;color:var(--ap-muted);margin-top:8px">Toca para activar cámara</div>`:selfieState==='scanning'?`<div class="face-outline"><div class="scan-line"></div></div><div style="font-size:12px;color:#94C52F">Escaneando… no te muevas</div>`:`<div style="font-size:36px">😊</div><div style="font-size:13px;color:#94C52F;margin-top:6px">✓ Selfie capturada</div>`}
       </div>
-    </div>`;
+      ${selfieState==='done'?`<div class="info-box">Biometría verificada correctamente.</div>`:`<div style="font-size:12px;color:var(--ap-muted);line-height:1.7">• Iluminación frontal<br>• Sin gafas de sol<br>• Mira directo a la cámara</div>`}
+      <button class="btn btn-primary" onclick="${selfieState==='done'?'go(\'terms\')':'takeSelfie()'}" ${selfieState==='scanning'?'style="opacity:0.4;pointer-events:none"':''}>
+        ${selfieState==='done'?'Continuar':'Capturar selfie'}
+      </button>
+    </div></div>`;
     return;
   }
 
-  if(step==='done') {
-    mc.innerHTML = `<div class="success-screen">
-      <div class="big-check">✓</div>
-      <div style="font-size:22px;font-weight:700;color:#F1EFE8;">¡Cuenta activada!</div>
-      <div style="font-size:13px;color:var(--ap-muted);line-height:1.6;">Tu identidad fue verificada. Bienvenido a Aparkapp.</div>
-      <div class="feature-list">
-        <div class="feature-row"><div class="feature-dot"></div>Identidad verificada con cédula y biometría</div>
-        <div class="feature-row"><div class="feature-dot"></div>Póliza de seguro activa en cada reserva</div>
-        <div class="feature-row"><div class="feature-dot"></div>Pagos digitales seguros habilitados</div>
-        <div class="feature-row"><div class="feature-dot"></div>Acceso a cupos en Chapinero y Usaquén</div>
+  if(step==='terms'){
+    const all=checks.terms&&checks.privacy&&checks.seguro;
+    mc.innerHTML=`<div style="flex-shrink:0"><div class="progress-bar"><div class="progress-fill" style="width:88%"></div></div></div>
+    <div class="screen-wrap"><div class="ob-screen">
+      <div class="step-back" onclick="go('selfie')">← Volver</div>
+      <div class="ob-icon accent">📋</div>
+      <div class="ob-title">Términos y condiciones</div>
+      <div class="terms-scroll">
+        <h4>1. Uso de la plataforma</h4>Aparkapp conecta conductores con anfitriones. El uso implica aceptar estas condiciones.<h4>2. Responsabilidades</h4>El conductor acepta usar el cupo en el horario pactado y responder por daños.<h4>3. Cancelaciones</h4>Más de 30 min: reembolso 100%. Cancelaciones tardías: penalidad del 50%.<h4>4. Seguro</h4>Cada transacción incluye póliza básica de responsabilidad civil.<h4>5. Protección de datos</h4>Tratamos datos conforme a la Ley 1581 de 2012. Información biométrica solo para verificación.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="check-row" onclick="toggleCheck('terms')"><div class="custom-check${checks.terms?' on':''}">✓</div><div class="check-text">Acepto los <span>Términos y Condiciones</span></div></div>
+        <div class="check-row" onclick="toggleCheck('privacy')"><div class="custom-check${checks.privacy?' on':''}">✓</div><div class="check-text">Acepto la <span>Política de Privacidad</span></div></div>
+        <div class="check-row" onclick="toggleCheck('seguro')"><div class="custom-check${checks.seguro?' on':''}">✓</div><div class="check-text">Acepto la <span>Póliza de Seguro</span></div></div>
+      </div>
+      <button class="btn btn-primary" onclick="${all?'go(\'done\')':'void(0)'}" style="${all?'':'opacity:0.4;pointer-events:none'}">Activar mi cuenta</button>
+      ${!all?`<div style="text-align:center;font-size:12px;color:var(--ap-muted)">Acepta todos los puntos para continuar</div>`:''}
+    </div></div>`;
+    return;
+  }
+
+  if(step==='done'){
+    mc.innerHTML=`<div class="screen-wrap"><div class="ob-screen" style="align-items:center;text-align:center;justify-content:center;flex:1">
+      <div style="width:72px;height:72px;border-radius:50%;background:rgba(148,197,47,0.15);border:0.5px solid rgba(148,197,47,0.3);display:flex;align-items:center;justify-content:center;font-size:32px">✓</div>
+      <div style="font-size:22px;font-weight:700;color:#F1EFE8">¡Cuenta activada!</div>
+      <div style="font-size:13px;color:var(--ap-muted);line-height:1.6">Tu identidad fue verificada.<br>Bienvenido a Aparkapp.</div>
+      <div style="width:100%;display:flex;flex-direction:column;gap:10px;text-align:left">
+        ${['Identidad verificada con cédula y biometría','Póliza de seguro activa en cada reserva','Pagos digitales seguros habilitados','Acceso a cupos en Chapinero y Usaquén'].map(f=>`<div style="display:flex;gap:10px;align-items:center;font-size:13px;color:var(--ap-muted)"><div style="width:7px;height:7px;border-radius:50%;background:#94C52F;flex-shrink:0"></div>${f}</div>`).join('')}
       </div>
       <div class="verified-badge">✓ Verificado por Aparkapp</div>
-      <button class="ob-btn" onclick="goStep('app')" style="margin-top:8px;">Explorar cupos</button>
-    </div>`;
+      <button class="btn btn-primary" onclick="go('app')">Explorar cupos</button>
+    </div></div>`;
     return;
   }
 
-  if(step==='app') { renderApp(); }
+  if(step==='app') renderApp();
 }
 
-function renderApp() {
-  const mc = document.getElementById('main-content');
-  if(role==='driver') {
-    mc.innerHTML = `<div style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
-      <div class="tab-bar">
-        <div class="tab${driverTab==='search'?' active':''}" onclick="setDTab('search')">Buscar</div>
-        <div class="tab${driverTab==='reservations'?' active':''}" onclick="setDTab('reservations')">Reservas</div>
-        <div class="tab${driverTab==='profile'?' active':''}" onclick="setDTab('profile')">Perfil</div>
-      </div>
-      <div class="content" id="driver-content" style="position:relative;"></div>
-    </div>`;
-    renderDriverContent();
+function renderApp(){
+  const mc=document.getElementById('main-content');
+  if(role==='driver'){
+    mc.innerHTML=`<div class="tab-bar">
+      <div class="tab${driverTab==='search'?' active':''}" onclick="setDTab('search')">Buscar</div>
+      <div class="tab${driverTab==='reservations'?' active':''}" onclick="setDTab('reservations')">Reservas</div>
+      <div class="tab${driverTab==='profile'?' active':''}" onclick="setDTab('profile')">Perfil</div>
+    </div>
+    <div class="app-content" id="driver-content"></div>`;
+    renderDriver();
   } else {
-    mc.innerHTML = `<div style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
-      <div class="tab-bar">
-        <div class="tab${hostTab==='dash'?' active':''}" onclick="setHTab('dash')">Panel</div>
-        <div class="tab${hostTab==='add'?' active':''}" onclick="setHTab('add')">Agregar cupo</div>
-        <div class="tab${hostTab==='manage'?' active':''}" onclick="setHTab('manage')">Gestionar</div>
-      </div>
-      <div class="content" id="host-content"></div>
-    </div>`;
-    renderHostContent();
+    mc.innerHTML=`<div class="tab-bar">
+      <div class="tab${hostTab==='dash'?' active':''}" onclick="setHTab('dash')">Panel</div>
+      <div class="tab${hostTab==='add'?' active':''}" onclick="setHTab('add')">Agregar cupo</div>
+      <div class="tab${hostTab==='manage'?' active':''}" onclick="setHTab('manage')">Gestionar</div>
+    </div>
+    <div class="app-content" id="host-content"></div>`;
+    renderHost();
   }
-  renderTopbarRight();
+  renderTopbar();
 }
 
-function setDTab(t) { driverTab=t; bookingStep='list'; selectedSpot=null; renderDriverContent(); }
-function setHTab(t) { hostTab=t; renderHostContent(); }
+function setDTab(t){driverTab=t;bookingStep='list';selectedSpot=null;renderDriver();}
+function setHTab(t){hostTab=t;renderHost();}
 
-function renderDriverContent() {
-  const el = document.getElementById('driver-content');
-  if(!el) return;
-  if(driverTab==='search') {
-    if(bookingStep==='success') { el.innerHTML = renderReservationSuccess(); return; }
-    const pins = spots.map(s=>`<div class="map-pin ${!s.available?'taken':selectedSpot===s.id?'selected':'available'}" style="left:${s.pin.x};top:${s.pin.y};transform:translate(-50%,-50%)" onclick="selectSpot(${s.id})">$${(s.price/1000).toFixed(1)}k</div>`).join('');
-    el.innerHTML = `
-      <div class="map-area">
-        <div class="map-grid"></div>
-        <div class="map-road-h" style="top:45%;"></div><div class="map-road-h" style="top:25%;"></div>
-        <div class="map-road-v" style="left:30%;"></div><div class="map-road-v" style="left:60%;"></div>
-        <div class="map-label" style="left:8%;top:47%">Cll 63</div><div class="map-label" style="left:8%;top:27%">Cll 82</div>
-        <div class="user-dot" style="position:absolute;left:43%;top:50%;transform:translate(-50%,-50%)"></div>
-        ${pins}
-        <div class="map-overlay"><strong>${spots.filter(s=>s.available).length}</strong> cupos disponibles</div>
-      </div>
-      <div class="search-bar">
-        <input class="search-input" placeholder="Buscar en Chapinero, Usaquén…" />
-        <div class="filter-pill" onclick="this.classList.toggle('on')">Ahora</div>
-        <div class="filter-pill" onclick="this.classList.toggle('on')">Seguro</div>
-      </div>
-      <div class="list-section" style="overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:${selectedSpot?'210px':'14px'}">
-        <div class="section-label">Cupos cercanos</div>
-        ${spots.map(s=>`<div class="spot-card${selectedSpot===s.id?' selected':''}" onclick="selectSpot(${s.id})">
-          <div class="spot-icon ${s.type}"><span style="font-size:20px;">${s.type==='home'?'🏠':'🅿'}</span></div>
-          <div class="spot-info">
-            <div class="spot-name">${s.name}</div>
-            <div class="spot-meta">${stars(s.rating)} <span>${s.rating} (${s.reviews})</span></div>
-            <div style="margin-top:5px;">${s.available?'<span class="spot-badge">Disponible</span>':'<span class="spot-badge" style="background:rgba(226,75,74,0.12);color:#F09595;">Ocupado</span>'}</div>
-          </div>
-          <div class="spot-right"><div class="spot-price">$${s.price.toLocaleString()}</div><div class="spot-unit">/${s.unit}</div><div class="spot-dist">${s.dist}</div></div>
-        </div>`).join('')}
-      </div>
-      ${selectedSpot ? renderBookingPanel() : ''}`;
-  } else if(driverTab==='reservations') {
-    el.innerHTML = `<div style="padding:14px;overflow-y:auto;-webkit-overflow-scrolling:touch;">
-      <div class="section-label" style="margin-bottom:12px;">Reservas activas</div>
-      <div class="spot-card selected"><div class="spot-icon bldg"><span style="font-size:20px;">🅿</span></div>
-        <div class="spot-info"><div class="spot-name">Parking Zona Rosa</div><div class="spot-meta">Hoy 3:00–5:00 PM · 2h</div><div style="margin-top:5px;"><span class="spot-badge">● En curso</span></div></div>
+function renderDriver(){
+  const el=document.getElementById('driver-content');
+  if(!el)return;
+  if(driverTab==='search'){
+    if(bookingStep==='success'){el.innerHTML=renderSuccess();return;}
+    const pins=spots.map(s=>`<div class="map-pin ${!s.available?'taken':selectedSpot===s.id?'selected':'available'}" style="left:${s.pin.x};top:${s.pin.y};transform:translate(-50%,-50%)" onclick="selectSpot(${s.id})">$${(s.price/1000).toFixed(1)}k</div>`).join('');
+    el.innerHTML=`<div class="map-area">
+      <div class="map-grid"></div>
+      <div class="map-road-h" style="top:45%"></div><div class="map-road-h" style="top:25%"></div>
+      <div class="map-road-v" style="left:30%"></div><div class="map-road-v" style="left:60%"></div>
+      <div class="map-label" style="left:8%;top:47%">Cll 63</div><div class="map-label" style="left:8%;top:27%">Cll 82</div>
+      <div class="user-dot" style="position:absolute;left:43%;top:50%;transform:translate(-50%,-50%)"></div>
+      ${pins}
+      <div class="map-overlay"><strong>${spots.filter(s=>s.available).length}</strong> cupos disponibles</div>
+    </div>
+    <div class="search-bar">
+      <input class="search-input" placeholder="Buscar en Chapinero, Usaquén…"/>
+      <div class="filter-pill" onclick="this.classList.toggle('on')">Ahora</div>
+      <div class="filter-pill" onclick="this.classList.toggle('on')">Seguro</div>
+    </div>
+    <div class="list-section" style="padding-bottom:${selectedSpot?'210px':'24px'}">
+      <div class="section-label">Cupos cercanos</div>
+      ${spots.map(s=>`<div class="spot-card${selectedSpot===s.id?' selected':''}" onclick="selectSpot(${s.id})">
+        <div class="spot-icon ${s.type}"><span style="font-size:20px">${s.type==='home'?'🏠':'🅿'}</span></div>
+        <div class="spot-info"><div class="spot-name">${s.name}</div>
+          <div class="spot-meta">${stars(s.rating)} <span>${s.rating} (${s.reviews})</span></div>
+          <div style="margin-top:5px">${s.available?'<span class="spot-badge">Disponible</span>':'<span class="spot-badge" style="background:rgba(226,75,74,0.12);color:#F09595">Ocupado</span>'}</div>
+        </div>
+        <div class="spot-right"><div class="spot-price">$${s.price.toLocaleString()}</div><div class="spot-unit">/${s.unit}</div><div class="spot-dist">${s.dist}</div></div>
+      </div>`).join('')}
+    </div>
+    ${selectedSpot?renderPanel():''}`;
+  } else if(driverTab==='reservations'){
+    el.innerHTML=`<div style="padding:14px;padding-bottom:24px">
+      <div class="section-label" style="margin-bottom:12px">Reservas activas</div>
+      <div class="spot-card selected"><div class="spot-icon bldg"><span style="font-size:20px">🅿</span></div>
+        <div class="spot-info"><div class="spot-name">Parking Zona Rosa</div><div class="spot-meta">Hoy 3:00–5:00 PM · 2h</div><div style="margin-top:5px"><span class="spot-badge">● En curso</span></div></div>
         <div class="spot-right"><div class="spot-price">$8.500</div><div class="spot-unit">pagado</div></div>
       </div>
-      <div class="section-label" style="margin:14px 0 10px;">Historial</div>
+      <div class="section-label" style="margin:14px 0 10px">Historial</div>
       ${[{n:'Parqueadero Chapinero',d:'Hace 2 días',p:'$6.400'},{n:'Cupo Edificio Altos',d:'Hace 5 días',p:'$5.000'}].map(r=>`
       <div class="spot-card"><div class="spot-info"><div class="spot-name">${r.n}</div><div class="spot-meta">${r.d}</div></div>
-        <div class="spot-right"><div class="spot-price" style="font-size:13px;">${r.p}</div></div></div>`).join('')}
+        <div class="spot-right"><div class="spot-price" style="font-size:13px">${r.p}</div></div></div>`).join('')}
     </div>`;
   } else {
-    el.innerHTML = `<div style="padding:20px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch;">
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
-        <div style="width:54px;height:54px;border-radius:50%;background:rgba(148,197,47,0.15);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;color:#94C52F;flex-shrink:0;">LC</div>
-        <div><div style="font-size:16px;font-weight:600;">Luis Carlos Medina</div><div style="margin-top:4px;"><span class="verified-badge">✓ Verificado</span></div></div>
+    el.innerHTML=`<div style="padding:20px 16px;padding-bottom:24px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+        <div style="width:54px;height:54px;border-radius:50%;background:rgba(148,197,47,0.15);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#94C52F;flex-shrink:0">LC</div>
+        <div><div style="font-size:16px;font-weight:700">Luis Carlos Medina</div><div style="margin-top:4px"><span class="verified-badge">✓ Verificado</span></div></div>
       </div>
-      <div style="font-size:13px;color:var(--ap-muted);margin-bottom:20px;">Placa: BJK 421 · Sedan</div>
-      <button class="ob-btn secondary" onclick="goStep('welcome')">Cerrar sesión</button>
+      <div style="font-size:13px;color:var(--ap-muted);margin-bottom:20px">Placa: BJK 421 · Sedan</div>
+      <button class="btn btn-secondary" onclick="go('welcome')">Cerrar sesión</button>
     </div>`;
   }
 }
 
-function renderHostContent() {
-  const el = document.getElementById('host-content');
-  if(!el) return;
-  if(hostTab==='dash') {
+function renderPanel(){
+  const s=spots.find(x=>x.id===selectedSpot);if(!s)return'';
+  const t=selectedTime||2;
+  return`<div class="booking-panel">
+    <div class="panel-title"><span>${s.name.split('·')[0].trim()}</span><span class="close-btn" onclick="closePanel()">×</span></div>
+    <div style="font-size:11px;color:var(--ap-muted);font-weight:500;margin-bottom:8px">DURACIÓN</div>
+    <div class="time-select">${[1,2,3,4].map(n=>`<button class="time-opt${n===t?' on':''}" onclick="selectTime(${n})">${n}h</button>`).join('')}</div>
+    <div class="price-summary">
+      <div><div class="price-label">$${s.price.toLocaleString()} × ${t}h + seguro</div><div class="price-label" style="margin-top:2px;font-size:11px">Reembolsable</div></div>
+      <div class="price-total">$${(s.price*t+500).toLocaleString()}</div>
+    </div>
+    <button class="btn btn-confirm" onclick="confirmBooking()">Confirmar y pagar</button>
+  </div>`;
+}
+
+function renderSuccess(){
+  const s=spots.find(x=>x.id===selectedSpot)||spots[0];
+  const qr=Array.from({length:64},(_,i)=>{const r=[0,1,8,9,48,49,56,57].includes(i)||Math.random()>0.5;return`<div class="qr-cell" style="background:${r?'#F1EFE8':'transparent'}"></div>`;}).join('');
+  return`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;text-align:center;gap:14px;flex:1">
+    <div style="width:64px;height:64px;border-radius:50%;background:rgba(148,197,47,0.15);display:flex;align-items:center;justify-content:center;font-size:28px">✓</div>
+    <div style="font-size:20px;font-weight:700">¡Reserva confirmada!</div>
+    <div style="font-size:13px;color:var(--ap-muted);line-height:1.6">${s.name}<br>Hoy · ${selectedTime}h · $${((s.price*selectedTime)+500).toLocaleString()} pagados</div>
+    <div style="background:var(--ap-card);border-radius:12px;border:0.5px solid rgba(148,197,47,0.2);padding:20px;display:flex;flex-direction:column;align-items:center;gap:8px;width:100%">
+      <div style="font-size:11px;color:var(--ap-muted);font-weight:600">CÓDIGO QR DE ACCESO</div>
+      <div class="qr-grid" style="margin:8px 0">${qr}</div>
+      <div style="font-size:11px;color:var(--ap-muted)">Muéstralo al llegar</div>
+    </div>
+    <button class="btn btn-secondary" style="width:auto;padding:12px 28px" onclick="resetDriver()">Volver al mapa</button>
+  </div>`;
+}
+
+function renderHost(){
+  const el=document.getElementById('host-content');if(!el)return;
+  if(hostTab==='dash'){
     const days=['L','M','M','J','V','S','D'];
-    const incomes=[18000,32000,12000,45000,68000,90000,55000];
-    const maxI=Math.max(...incomes);
-    el.innerHTML = `<div class="host-wrap">
+    const inc=[18000,32000,12000,45000,68000,90000,55000];
+    const mx=Math.max(...inc);
+    el.innerHTML=`<div style="padding:14px;display:flex;flex-direction:column;gap:10px;padding-bottom:24px">
       <div class="stat-grid">
         <div class="stat-card"><div class="stat-label">Ingresos este mes</div><div class="stat-val accent">$320k</div></div>
         <div class="stat-card"><div class="stat-label">Reservas activas</div><div class="stat-val">7</div></div>
@@ -530,106 +532,71 @@ function renderHostContent() {
         <div class="stat-card"><div class="stat-label">Calificación</div><div class="stat-val accent">4.8 ★</div></div>
       </div>
       <div class="stat-card">
-        <div class="stat-label" style="margin-bottom:10px;">Ingresos últimos 7 días</div>
-        ${days.map((d,i)=>`<div class="bar-row"><span class="bar-day">${d}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(incomes[i]/maxI*100)}%"></div></div><span class="bar-amt">$${Math.round(incomes[i]/1000)}k</span></div>`).join('')}
+        <div class="stat-label" style="margin-bottom:10px">Ingresos últimos 7 días</div>
+        ${days.map((d,i)=>`<div class="bar-row"><span class="bar-day">${d}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(inc[i]/mx*100)}%"></div></div><span class="bar-amt">$${Math.round(inc[i]/1000)}k</span></div>`).join('')}
       </div>
       <div class="section-label">Mis cupos</div>
-      <div class="spot-card" style="cursor:default;">
-        <div class="spot-icon bldg"><span style="font-size:20px;">🅿</span></div>
-        <div class="spot-info"><div class="spot-name">Cupo 301 · Edificio Altos</div><div class="spot-meta">Chapinero · $2.500/h</div><div style="margin-top:5px;"><span class="chip chip-on">● Activo</span></div></div>
-        <div class="toggle-switch on" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="toggle-knob"></div></div>
+      <div class="spot-card" style="cursor:default">
+        <div class="spot-icon bldg"><span style="font-size:20px">🅿</span></div>
+        <div class="spot-info"><div class="spot-name">Cupo 301 · Edificio Altos</div><div class="spot-meta">Chapinero · $2.500/h</div><div style="margin-top:5px"><span class="chip chip-on">● Activo</span></div></div>
+        <div class="toggle-sw on" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="toggle-knob"></div></div>
       </div>
-      <div class="spot-card" style="cursor:default;">
-        <div class="spot-icon home"><span style="font-size:20px;">🏠</span></div>
-        <div class="spot-info"><div class="spot-name">Garaje casa · Cll 64</div><div class="spot-meta">Chapinero · $1.800/h</div><div style="margin-top:5px;"><span class="chip chip-off">Pausado</span></div></div>
-        <div class="toggle-switch off" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="toggle-knob"></div></div>
+      <div class="spot-card" style="cursor:default">
+        <div class="spot-icon home"><span style="font-size:20px">🏠</span></div>
+        <div class="spot-info"><div class="spot-name">Garaje casa · Cll 64</div><div class="spot-meta">Chapinero · $1.800/h</div><div style="margin-top:5px"><span class="chip chip-off">Pausado</span></div></div>
+        <div class="toggle-sw off" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="toggle-knob"></div></div>
       </div>
     </div>`;
-  } else if(hostTab==='add') {
-    el.innerHTML = `<div class="host-wrap">
-      <div class="section-label">Nuevo cupo de parqueo</div>
+  } else if(hostTab==='add'){
+    el.innerHTML=`<div style="padding:14px;display:flex;flex-direction:column;gap:12px;padding-bottom:24px">
+      <div class="section-label">Nuevo cupo</div>
       <div class="form-group"><div class="form-label">Tipo de espacio</div>
-        <select class="form-input"><option>Cupo residencial (garaje privado)</option><option>Propiedad horizontal (PH)</option><option>Parqueadero independiente</option></select>
+        <select class="form-input"><option>Cupo residencial (garaje)</option><option>Propiedad horizontal (PH)</option><option>Parqueadero independiente</option></select>
       </div>
-      <div class="form-group"><div class="form-label">Dirección</div><input class="form-input" placeholder="Ej: Cra 13 #63-45, Chapinero" /></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div class="form-group"><div class="form-label">Precio/hora</div><input class="form-input" placeholder="$2.500" type="number" inputmode="numeric" /></div>
-        <div class="form-group"><div class="form-label">Núm. cupos</div><input class="form-input" placeholder="1" type="number" inputmode="numeric" /></div>
+      <div class="form-group"><div class="form-label">Dirección</div><input class="form-input" placeholder="Cra 13 #63-45, Chapinero"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="form-group"><div class="form-label">Precio/hora</div><input class="form-input" placeholder="$2.500" type="number" inputmode="numeric"/></div>
+        <div class="form-group"><div class="form-label">Núm. cupos</div><input class="form-input" placeholder="1" type="number" inputmode="numeric"/></div>
       </div>
-      <div class="form-group"><div class="form-label">Horario disponible</div>
-        <select class="form-input"><option>Lunes a viernes 8am–6pm</option><option>Todos los días 24h</option><option>Fines de semana</option></select>
+      <div class="form-group"><div class="form-label">Horario</div>
+        <select class="form-input"><option>Lun–Vie 8am–6pm</option><option>Todos los días 24h</option><option>Fines de semana</option></select>
       </div>
       <div class="form-group"><div class="form-label">Características</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
-          ${['Techado','Vigilancia','Iluminado','Acceso 24h','Cámaras'].map(c=>`<div class="filter-pill" onclick="this.classList.toggle('on')">${c}</div>`).join('')}
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+          ${['Techado','Vigilancia','Iluminado','24h','Cámaras'].map(c=>`<div class="filter-pill" onclick="this.classList.toggle('on')">${c}</div>`).join('')}
         </div>
       </div>
-      <button class="host-form-btn" onclick="showAddSuccess()">Publicar cupo</button>
-      <div id="add-success" style="display:none;" class="info-box">✓ ¡Cupo publicado! Ya aparece en el mapa de Aparkapp.</div>
+      <button class="btn btn-primary" onclick="showAddOk()">Publicar cupo</button>
+      <div id="add-ok" style="display:none" class="info-box">✓ ¡Cupo publicado! Ya aparece en el mapa.</div>
     </div>`;
   } else {
-    el.innerHTML = `<div class="host-wrap">
+    el.innerHTML=`<div style="padding:14px;display:flex;flex-direction:column;gap:10px;padding-bottom:24px">
       <div class="section-label">Reservas de hoy</div>
-      ${[
-        {driver:'Carlos M.',placa:'BJK 421',hora:'2:00–4:00 PM',estado:'En curso',val:'$5.000'},
-        {driver:'Andrea L.',placa:'QWE 987',hora:'4:30–5:30 PM',estado:'Próxima',val:'$2.500'},
-        {driver:'Felipe R.',placa:'TUV 345',hora:'7:00–9:00 PM',estado:'Próxima',val:'$5.000'},
-      ].map(r=>`<div class="spot-card" style="cursor:default;">
-        <div style="width:38px;height:38px;border-radius:50%;background:rgba(148,197,47,0.12);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#94C52F;flex-shrink:0;">${r.driver.split(' ').map(w=>w[0]).join('')}</div>
-        <div class="spot-info"><div class="spot-name">${r.driver} · ${r.placa}</div><div class="spot-meta">${r.hora}</div>
-          <div style="margin-top:4px;"><span class="chip ${r.estado==='En curso'?'chip-on':'chip-off'}">${r.estado==='En curso'?'● ':''} ${r.estado}</span></div>
-        </div>
-        <div class="spot-right"><div class="spot-price" style="font-size:13px;">${r.val}</div></div>
+      ${[{d:'Carlos M.',p:'BJK 421',h:'2:00–4:00 PM',e:'En curso',v:'$5.000'},
+         {d:'Andrea L.',p:'QWE 987',h:'4:30–5:30 PM',e:'Próxima',v:'$2.500'},
+         {d:'Felipe R.',p:'TUV 345',h:'7:00–9:00 PM',e:'Próxima',v:'$5.000'}].map(r=>`
+      <div class="spot-card" style="cursor:default">
+        <div style="width:40px;height:40px;border-radius:50%;background:rgba(148,197,47,0.12);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#94C52F;flex-shrink:0">${r.d.split(' ').map(w=>w[0]).join('')}</div>
+        <div class="spot-info"><div class="spot-name">${r.d} · ${r.p}</div><div class="spot-meta">${r.h}</div><div style="margin-top:4px"><span class="chip ${r.e==='En curso'?'chip-on':'chip-off'}">${r.e==='En curso'?'● ':''} ${r.e}</span></div></div>
+        <div class="spot-right"><div class="spot-price" style="font-size:13px">${r.v}</div></div>
       </div>`).join('')}
-      <div class="toggle-row"><span class="toggle-label">Aceptar automáticamente</span><div class="toggle-switch off" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="toggle-knob"></div></div></div>
-      <div class="toggle-row"><span class="toggle-label">Notificar nueva reserva</span><div class="toggle-switch on" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="toggle-knob"></div></div></div>
+      <div class="toggle-row"><span class="toggle-label">Aceptar automáticamente</span><div class="toggle-sw off" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="toggle-knob"></div></div></div>
+      <div class="toggle-row"><span class="toggle-label">Notificar nueva reserva</span><div class="toggle-sw on" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="toggle-knob"></div></div></div>
     </div>`;
   }
 }
 
-function renderBookingPanel() {
-  const s=spots.find(x=>x.id===selectedSpot); if(!s) return '';
-  const timeSel=selectedTime||2;
-  const total=s.price*timeSel+500;
-  return `<div class="booking-panel">
-    <div class="panel-title"><span>${s.name.split('·')[0].trim()}</span><span class="close-btn" onclick="closePanel()">×</span></div>
-    <div class="form-label" style="margin-bottom:8px;">Duración</div>
-    <div class="time-select">${[1,2,3,4].map(t=>`<div class="time-opt${t===timeSel?' on':''}" onclick="selectTime(${t})">${t}h</div>`).join('')}</div>
-    <div class="price-summary">
-      <div><div class="price-label">$${s.price.toLocaleString()} × ${timeSel}h + seguro</div><div class="price-label" style="font-size:11px;margin-top:2px;">Pago digital · Reembolsable</div></div>
-      <div class="price-total">$${total.toLocaleString()}</div>
-    </div>
-    <button class="confirm-btn" onclick="confirmBooking()">Confirmar y pagar</button>
-  </div>`;
-}
-
-function renderReservationSuccess() {
-  const s=spots.find(x=>x.id===selectedSpot)||spots[0];
-  const qr=Array.from({length:64},(_,i)=>{const r=[0,1,8,9,48,49,56,57].includes(i)||Math.random()>0.5;return`<div class="qr-cell" style="background:${r?'#F1EFE8':'transparent'}"></div>`;}).join('');
-  return `<div class="res-success">
-    <div class="check-circle">✓</div>
-    <div style="font-size:20px;font-weight:700;">¡Reserva confirmada!</div>
-    <div style="font-size:13px;color:var(--ap-muted);line-height:1.6;">${s.name}<br>Hoy · ${selectedTime}h · $${((s.price*selectedTime)+500).toLocaleString()} pagados</div>
-    <div style="background:var(--ap-card);border-radius:12px;border:0.5px solid rgba(148,197,47,0.2);padding:20px;display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;">
-      <div class="form-label">Código QR de acceso</div>
-      <div class="qr-grid" style="margin:8px 0;">${qr}</div>
-      <div style="font-size:11px;color:var(--ap-muted);">Muéstralo al llegar</div>
-    </div>
-    <button class="back-btn" onclick="resetDriver()">Volver al mapa</button>
-  </div>`;
-}
-
-function selectSpot(id){selectedSpot=id;selectedTime=2;renderDriverContent();}
-function closePanel(){selectedSpot=null;renderDriverContent();}
-function selectTime(t){selectedTime=t;renderDriverContent();}
-function confirmBooking(){bookingStep='success';renderDriverContent();}
-function resetDriver(){bookingStep='list';selectedSpot=null;renderDriverContent();}
-function handleOtp(i,val){otpVals[i]=val.slice(-1);if(val&&i<5){const n=document.getElementById('otp-'+(i+1));if(n)n.focus();}render();}
+function selectSpot(id){selectedSpot=id;selectedTime=2;renderDriver();}
+function closePanel(){selectedSpot=null;renderDriver();}
+function selectTime(t){selectedTime=t;renderDriver();}
+function confirmBooking(){bookingStep='success';renderDriver();}
+function resetDriver(){bookingStep='list';selectedSpot=null;renderDriver();}
+function handleOtp(i,v){otpVals[i]=v.slice(-1);if(v&&i<5){const n=document.getElementById('otp-'+(i+1));if(n)n.focus();}render();}
 function handleOtpKey(e,i){if(e.key==='Backspace'&&!otpVals[i]&&i>0){otpVals[i-1]='';const p=document.getElementById('otp-'+(i-1));if(p)p.focus();render();}}
-function fillOtpAndNext(){otpVals=['4','2','7','8','1','9'];goStep('verify_fee');}
+function fillOtpAndNext(){otpVals=['4','2','7','8','1','9'];go('verify_fee');}
 function toggleCheck(k){checks[k]=!checks[k];render();}
-function takeSelfie(){if(selfieState==='idle'){selfieState='scanning';render();setTimeout(()=>{selfieState='done';render();},2000);}else if(selfieState==='done'){goStep('terms');}}
-function showAddSuccess(){const el=document.getElementById('add-success');if(el)el.style.display='block';}
+function takeSelfie(){if(selfieState==='idle'){selfieState='scanning';render();setTimeout(()=>{selfieState='done';render();},2000);}else if(selfieState==='done'){go('terms');}}
+function showAddOk(){const el=document.getElementById('add-ok');if(el)el.style.display='block';}
 
 render();
 </script>
